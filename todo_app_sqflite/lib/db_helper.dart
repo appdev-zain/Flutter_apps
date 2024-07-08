@@ -28,13 +28,16 @@ class DbHelper {
         (id INTEGER PRIMARY KEY AUTOINCREMENT, 
         title TEXT NOT NULL, 
         description TEXT NOT NULL, 
-        age INTEGER  NOT NULL, 
-        email TEXT
+        dueDate TEXT NOT NULL,
+        category TEXT NOT NULL,
+        priority TEXT NOT NULL,
+        reminder INTEGER NOT NULL
         )''');
   }
 
   Future<NotesModel> insert(NotesModel notesModel) async {
     var dbClient = await db;
+    print('notesModel $notesModel');
     await dbClient!.insert('todo', notesModel.toMap());
     return notesModel;
   }
@@ -43,6 +46,7 @@ class DbHelper {
     var dbClient = await db;
     final List<Map<String, dynamic>> queryResult =
         await dbClient!.query('todo');
+    print('get result $queryResult');
 
     return queryResult.map((e) => NotesModel.fromMap(e)).toList();
   }
