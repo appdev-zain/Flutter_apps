@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:todo_app_sqflite/db_helper.dart';
 import 'package:todo_app_sqflite/notes.dart';
 
@@ -12,6 +13,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   DbHelper? dbHelper;
+  late DateTime _selectedDate;
+  late DateTime _displayedMonth;
+
   late Future<List<NotesModel>> notesList;
   loadData() async {
     setState(() {
@@ -23,6 +27,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     dbHelper = DbHelper();
+    _selectedDate = DateTime.now();
+    _displayedMonth = DateTime(_selectedDate.year, _selectedDate.month);
     loadData();
   }
 
@@ -32,18 +38,38 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context) => Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
-          title: const Text('Todo List App'),
+          title: Row(
+            children: [
+              Text(DateFormat('MMMM').format(_displayedMonth),
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontFamily: 'sans-serif',
+                    fontWeight: FontWeight.w500,
+                  )),
+              const SizedBox(
+                width: 3,
+              ),
+              Text(DateFormat(' yyyy').format(_displayedMonth),
+                  style: TextStyle(
+                      fontSize: 22,
+                      fontFamily: 'Roboto',
+                      fontWeight: FontWeight.w600,
+                      color: Colors.red[600])),
+            ],
+          ),
           actions: [
             IconButton(
               icon: const Icon(Icons.add),
               onPressed: () {
                 dbHelper!
-                    .insert(NotesModel(
-                  title: 'First Todo Item',
-                  description: 'This si the first todo item',
-                  age: 20,
-                  email: 'appdev.zain@gmail.com',
-                ))
+                    .insert(
+                  NotesModel(
+                    title: 'First Todo Item',
+                    description: 'This si the first todo item',
+                    age: 20,
+                    email: 'appdev.zain@gmail.com',
+                  ),
+                )
                     .then((value) {
                   print('Todo item inserted');
                   setState(() {
@@ -56,7 +82,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        drawer: const _drawer(),
         body: Column(
           children: [
             Expanded(
@@ -125,48 +150,55 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            _showAddTaskDialog(context);
+          },
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
 }
 
-class _drawer extends StatelessWidget {
-  const _drawer({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: <Widget>[
-          DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.blue,
+void _showAddTaskDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text('Add Task'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              decoration: InputDecoration(hintText: 'Title'),
             ),
-            child: Text('Drawer Header'),
-          ),
-          ListTile(
-            title: Text('Home'),
-            onTap: () {
-              // Update the state of the app
-              // ...
-              // Then close the drawer
+            TextField(
+              decoration: InputDecoration(hintText: 'Description'),
+            ),
+            TextField(
+              decoration: InputDecoration(hintText: 'Age'),
+            ),
+            TextField(
+              decoration: InputDecoration(hintText: 'Email'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
               Navigator.pop(context);
             },
+            child: Text('Cancel'),
           ),
-          ListTile(
-            title: Text('Item 2'),
-            onTap: () {
-              // Update the state of the app
-              // ...
-              // Then close the drawer
+          TextButton(
+            onPressed: () {
               Navigator.pop(context);
             },
+            child: Text('Add'),
           ),
         ],
-      ),
-    );
-  }
+      );
+    },
+  );
 }
