@@ -60,9 +60,10 @@ class HomeScreen extends StatelessWidget {
                         ),
                         child: Card(
                           child: ListTile(
-                            contentPadding: EdgeInsets.all(0),
+                            contentPadding: const EdgeInsets.all(0),
                             title: Text(note.title),
                             subtitle: Text(note.description),
+                            trailing: Text(note.dueDate.toString()),
                           ),
                         ),
                       ),
@@ -86,14 +87,16 @@ void _showAddTaskBottomSheet(BuildContext context, String operation,
   String title = task?.title ?? '';
   String description = task?.description ?? '';
   DateTime? dueDate = task?.dueDate;
-  String priority = task?.priority ?? 'Medium';
-  String category = task?.category ?? '';
+  Priority priority = task?.priority ?? Priority.Medium;
+  TaskCategory category = task != null
+      ? TaskCategory.values.firstWhere((e) => e.name == task.category)
+      : TaskCategory.other;
   bool reminder = task?.reminder ?? false;
 
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    shape: RoundedRectangleBorder(
+    shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
     ),
     builder: (context) {
@@ -110,15 +113,15 @@ void _showAddTaskBottomSheet(BuildContext context, String operation,
           child: ListView(
             shrinkWrap: true,
             children: [
-              Text(
+              const Text(
                 'Add New Task',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               TextFormField(
                 initialValue: title,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Title',
                   border: OutlineInputBorder(),
                 ),
@@ -130,67 +133,80 @@ void _showAddTaskBottomSheet(BuildContext context, String operation,
                 },
                 onSaved: (value) => title = value!,
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               TextFormField(
                 initialValue: description,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Description',
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 3,
                 onSaved: (value) => description = value!,
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               ListTile(
                 title: Text(
                     'Due Date: ${dueDate != null ? DateFormat.yMd().format(dueDate!) : 'Not set'}'),
-                trailing: Icon(Icons.calendar_today),
+                trailing: const Icon(Icons.calendar_today),
                 onTap: () async {
                   dueDate = await showDatePicker(
                     context: context,
                     initialDate: dueDate ?? DateTime.now(),
                     firstDate: DateTime.now(),
-                    lastDate: DateTime.now().add(Duration(days: 365)),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
                   );
                 },
               ),
-              DropdownButtonFormField<String>(
+              DropdownButtonFormField<Priority>(
                 value: priority,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Priority',
                   border: OutlineInputBorder(),
                 ),
-                items: ['Low', 'Medium', 'High'].map((String value) {
-                  return DropdownMenuItem<String>(
+                items: Priority.values.map((Priority value) {
+                  return DropdownMenuItem<Priority>(
                     value: value,
-                    child: Text(value),
+                    child: Text(value.name),
                   );
                 }).toList(),
-                onChanged: (String? newValue) {
+                onChanged: (Priority? newValue) {
                   priority = newValue!;
                 },
               ),
-              SizedBox(height: 12),
-              TextFormField(
-                initialValue: category,
-                decoration: InputDecoration(
+              const SizedBox(height: 12),
+              DropdownButtonFormField<TaskCategory>(
+                value: category,
+                decoration: const InputDecoration(
                   labelText: 'Category',
                   border: OutlineInputBorder(),
                 ),
-                onSaved: (value) => category = value!,
+                items: TaskCategory.values.map((TaskCategory value) {
+                  return DropdownMenuItem<TaskCategory>(
+                    value: value,
+                    child: Text(value.name),
+                  );
+                }).toList(),
+                onChanged: (TaskCategory? newValue) {
+                  category = newValue!;
+                },
+                validator: (value) {
+                  if (value == null) {
+                    return 'Please select a category';
+                  }
+                  return null;
+                },
               ),
               SwitchListTile(
-                title: Text('Set Reminder'),
+                title: const Text('Set Reminder'),
                 value: reminder,
                 onChanged: (bool value) {
                   reminder = value;
                 },
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               ElevatedButton(
-                child: Text(operation == 'insert' ? 'Add Task' : 'Update Task'),
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 12),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
@@ -217,8 +233,9 @@ void _showAddTaskBottomSheet(BuildContext context, String operation,
                         .addOrUpdateTask(newTask, operation);
                   }
                 },
+                child: Text(operation == 'insert' ? 'Add Task' : 'Update Task'),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
             ],
           ),
         ),
