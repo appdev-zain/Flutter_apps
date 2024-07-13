@@ -53,17 +53,35 @@ class HomeScreen extends StatelessWidget {
                         onDismissed: (direction) {
                           notesProvider.deleteTask(note.id!);
                         },
-                        background: Container(
-                          color: Colors.red,
-                          alignment: Alignment.centerRight,
-                          child: const Icon(Icons.delete),
+                        background: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10.0, vertical: 8),
+                          child: Container(
+                            color: Colors.red,
+                            alignment: Alignment.centerRight,
+                            child: const Icon(Icons.delete),
+                          ),
                         ),
-                        child: Card(
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.all(0),
-                            title: Text(note.title),
-                            subtitle: Text(note.description),
-                            trailing: Text(note.dueDate.toString()),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          child: Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: ListTile(
+                                leading: const Icon(Icons.task),
+                                contentPadding: const EdgeInsets.all(0),
+                                title: Text(note.title),
+                                subtitle: Text(note.description),
+                                trailing: Text(
+                                  note.dueDate != null
+                                      ? DateFormat('yMd').format(note.dueDate!)
+                                      : 'No date',
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -83,7 +101,7 @@ class HomeScreen extends StatelessWidget {
 
 void _showAddTaskBottomSheet(BuildContext context, String operation,
     [NotesModel? task]) {
-  final _formKey = GlobalKey<FormState>();
+  final formKey = GlobalKey<FormState>();
   String title = task?.title ?? '';
   String description = task?.description ?? '';
   DateTime? dueDate = task?.dueDate;
@@ -109,7 +127,7 @@ void _showAddTaskBottomSheet(BuildContext context, String operation,
           top: 16,
         ),
         child: Form(
-          key: _formKey,
+          key: formKey,
           child: ListView(
             shrinkWrap: true,
             children: [
@@ -209,8 +227,8 @@ void _showAddTaskBottomSheet(BuildContext context, String operation,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
                 onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _formKey.currentState!.save();
+                  if (formKey.currentState!.validate()) {
+                    formKey.currentState!.save();
                     final newTask = NotesModel(
                       id: task?.id,
                       title: title,
