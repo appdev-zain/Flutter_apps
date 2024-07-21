@@ -1,7 +1,4 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-
-enum Priority { Low, Medium, High }
+enum Priority { low, medium, high }
 
 enum TaskCategory {
   work,
@@ -21,16 +18,16 @@ class NotesModel {
   DateTime? dueDate;
   final Priority priority;
   final TaskCategory category;
-  bool reminder = false;
+  bool reminder;
 
   NotesModel({
     this.id,
     required this.title,
     required this.description,
-    required this.dueDate,
+    this.dueDate,
     required this.category,
     required this.priority,
-    required this.reminder,
+    this.reminder = false,
   });
 
   NotesModel.fromMap(Map<String, dynamic> map)
@@ -45,8 +42,8 @@ class NotesModel {
             orElse: () => TaskCategory.other),
         priority = Priority.values.firstWhere(
             (e) => e.toString() == 'Priority.' + map['priority'],
-            orElse: () => Priority.Medium),
-        reminder = map['reminder'] == 1 ? true : false;
+            orElse: () => Priority.medium),
+        reminder = map['reminder'] == 1;
 
   Map<String, Object?> toMap() {
     return {
@@ -58,5 +55,25 @@ class NotesModel {
       'priority': priority.toString().split('.').last,
       'reminder': reminder ? 1 : 0,
     };
+  }
+
+  NotesModel copy({
+    int? id,
+    String? title,
+    String? description,
+    DateTime? dueDate,
+    TaskCategory? category,
+    Priority? priority,
+    bool? reminder,
+  }) {
+    return NotesModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      dueDate: dueDate ?? this.dueDate,
+      category: category ?? this.category,
+      priority: priority ?? this.priority,
+      reminder: reminder ?? this.reminder,
+    );
   }
 }

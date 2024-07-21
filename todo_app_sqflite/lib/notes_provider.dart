@@ -11,11 +11,13 @@ class NotesProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   Future<void> loadNotes() async {
-    _isLoading = true;
-    notifyListeners();
-    _notesList = await _dbHelper.getNotesList();
-    _isLoading = false;
-    notifyListeners();
+    try {
+      _notesList = await _dbHelper.getNotesList();
+      notifyListeners();
+    } catch (e) {
+      print('Error loading notes: $e');
+      // Handle the error appropriately
+    }
   }
 
   Future<void> addOrUpdateTask(NotesModel task, String operation) async {
@@ -30,6 +32,11 @@ class NotesProvider with ChangeNotifier {
 
   Future<void> deleteTask(int id) async {
     await _dbHelper.delete(id);
+    await loadNotes();
+  }
+
+  void deleteAll() async {
+    await _dbHelper.deleteAll();
     await loadNotes();
   }
 }
